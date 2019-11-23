@@ -97,7 +97,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     });
                 }
                 else if(qtype == 'updateDB'){
@@ -110,7 +110,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     });
                 }
                 else if(qtype == 'addStudent'){
@@ -122,7 +122,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     });
                 }
                 else if(qtype == 'addRoom'){
@@ -134,7 +134,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     });
                 }
                 else if(qtype == 'getLatecnt'){
@@ -146,7 +146,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     })
                 }
                 else if(qtype == 'getAlarm'){
@@ -155,13 +155,11 @@ function main(){
                     getAlarm(json)
                     .then((value) => {
                         res.writeHead(200);
-                        console.log(value);
-                        res.end(value);
+                        res.end(value.toString());
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        console.log("Error!")
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     })
                 }
                 else if(qtype == 'getAllStudents'){
@@ -172,7 +170,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     })
                 }
                 else if(qtype == 'getBuildings'){
@@ -183,7 +181,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     });
                 }
                 else if(qtype == 'getBuildingRooms'){
@@ -195,7 +193,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     });
                 }
                 else if(qtype == 'clearDB'){
@@ -209,7 +207,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(err));
+                        res.end(err.toString());
                     })
                 }
                 else{
