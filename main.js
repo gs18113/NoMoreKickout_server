@@ -4,14 +4,18 @@ const { parse } = require('querystring');
 const AppDAO = require('./dao');
 const StudentRepository = require('./student_repository');
 const DormRepository = require('./dorm_repository');
+const RequestRepository = require('./request_repository');
 
 const dao = new AppDAO('./database.db');
 const studentInfo = new StudentRepository(dao);
 const dormInfo = new DormRepository(dao);
+const requestInfo = new RequestRepository(dao);
 studentInfo.deleteTable()
 .then(() => dormInfo.deleteTable())
+.then(() => requestInfo.deleteTable())
 .then(() => studentInfo.createTable())
 .then(() => dormInfo.createTable())
+.then(() => requestInfo.createTable())
 .then(main)
 
 function setAlarm(json){
@@ -21,7 +25,7 @@ function setAlarm(json){
     return Promise.all(actions);
 }
 
-function updateDB(json){
+function addLate(json){
     return Promise.all(
         json.map((value) => {
         studentInfo.get()
@@ -42,6 +46,11 @@ function addRoom(json){
     .then(value => value.id);
 }
 
+function addRequest(json){
+    return requestInfo.insert(json)
+    .then(value => value.id);
+}
+
 function getLatecnt(json){
     return studentInfo.get(json.ID)
     .then(data => data.latecnt);
@@ -49,7 +58,7 @@ function getLatecnt(json){
 
 function getAlarm(json){
     return studentInfo.get(json.ID)
-    .then(data => data.alarm);
+    .then(data => (!data.noAlert)&&data.alarm);
 }
 
 function getBuildings(){
@@ -62,6 +71,45 @@ function getBuildingRooms(name){
 
 function getAllStudents(){
     return studentInfo.getAll();
+}
+
+function getAllRequests(){
+    return requestInfo.getAll();
+}
+
+function answerRequest(json){
+    if(json.confirm == 1){
+        return requestInfo.get(json.RID)
+        .then((value) => {
+            if(value.requestType == 1){
+                return studentInfo.get(value.ID)
+                .then((orig) => {
+                    return studentInfo.update({
+                        ID: value.ID,
+                        building: value.building.trim(),
+                        room: value.room,
+                        name: value.name,
+                        latecnt: orig.latecnt,
+                        noAlert: value.noAlert,
+                        alarm: orig.alarm
+                    });
+                });
+            }
+            else{
+                return studentInfo.insert({
+                    ID: value.ID,
+                    building: value.building.trim(),
+                    room: value.room,
+                    name: value.name,
+                    latecnt: 0,
+                    noAlert: value.noAlert,
+                    alarm: 0
+                });
+            }
+        })
+        .then(() => requestInfo.delete(json.RID));
+    }
+    else return requestInfo.delete(json.RID);
 }
 
 function main(){
@@ -82,7 +130,7 @@ function main(){
                 }
                 console.log("Received POST request. Query type: ");
                 console.log(qtype)
-                if(qtype != "getAllStudents" && qtype != "clearDB" && _json == null){
+                if(qtype != "getAllStudents" && qtype != "clearDB" && qtype != "getAllRequests" && _json == null){
                     res.writeHead(200);
                     res.end("Query invalid!");
                     return;
@@ -100,10 +148,10 @@ function main(){
                         res.end(err.toString());
                     });
                 }
-                else if(qtype == 'updateDB'){
+                else if(qtype == 'addLate'){
                     // late cnt ++
                     // json : [1, 2, ...] --> contains id
-                    updateDB(json)
+                    addLate(json)
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");
@@ -198,8 +246,45 @@ function main(){
                 else if(qtype == 'clearDB'){
                     studentInfo.deleteTable()
                     .then(() => dormInfo.deleteTable())
+                    .then(() => requestInfo.deleteTable())
                     .then(() => studentInfo.createTable()) 
                     .then(() => dormInfo.createTable())
+                    .then(() => requestInfo.createTable())
+                    .then(() => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    })
+                }
+                else if(qtype == 'addRequest'){
+                    // json: {"ID": ?, "building": ?, "room": ?, "name":, ?, "noAlert": ?, "requestType": ?}
+                    addRequest(json)
+                    .then((nid) => {
+                        res.writeHead(200);
+                        res.end(nid.toString());
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    })
+                }
+                else if(qtype == 'getAllRequests'){
+                    getAllRequests()
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(value));
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    })
+                }
+                else if(qtype == 'answerRequest'){
+                    //json: {"RID": ?, "confirm": 0/1 }
+                    answerRequest(json)
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");

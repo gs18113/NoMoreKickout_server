@@ -13,7 +13,8 @@ class StudentRepository{
             room INTEGER NOT NULL,
             name TEXT NOT NULL,
             latecnt INTEGER NOT NULL,
-            alarm NTEGER NOT NULL)`;
+            noAlert INTEGER NOT NULL,
+            alarm INTEGER NOT NULL)`;
         return this.dao.run(sql);
     }
 
@@ -25,21 +26,22 @@ class StudentRepository{
     insert(row){
         return this.dao.run(
             `INSERT INTO studentInfo
-            (ID, building, room, name, latecnt, alarm)
-            VALUES (?, ?, ?, ?, ?, ?)`, [row.ID, row.building, row.room, row.name, row.latecnt, row.alarm]
+            (ID, building, room, name, latecnt, noAlert, alarm)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`, [row.ID, row.building, row.room, row.name, row.latecnt, row.noAlert, row.alarm]
         );
     }
 
     update(row){
-        const {ID, building, room, name, latecnt, alarm} = row;
+        const {ID, building, room, name, latecnt, noAlert, alarm} = row;
         return this.dao.run(
             `UPDATE studentInfo
             SET building = ?,
             room = ?,
             name = ?,
             latecnt = ?,
+            noAlert = ?,
             alarm = ?
-            WHERE ID = ?`, [building, room, name, latecnt, alarm, ID]
+            WHERE ID = ?`, [building, room, name, latecnt, noAlert, alarm, ID]
         );
     }
 
@@ -54,7 +56,7 @@ class StudentRepository{
     }
 
     updateAlarm(row){
-        const {ID, latecnt} = row;
+        const {ID, alarm} = row;
         return this.dao.run(
             `UPDATE studentInfo
             SET
