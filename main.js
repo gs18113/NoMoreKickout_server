@@ -151,6 +151,7 @@ function main(){
                 }
                 else if(qtype == 'getAlarm'){
                     // json: {"ID": 1}
+                    console.log("Alarm!!")
                     getAlarm(json)
                     .then((value) => {
                         res.writeHead(200);
@@ -159,6 +160,7 @@ function main(){
                     })
                     .catch((err) => {
                         res.writeHead(200);
+                        console.log("Error!")
                         res.end(JSON.stringify(err));
                     })
                 }
