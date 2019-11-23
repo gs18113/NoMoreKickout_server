@@ -8,7 +8,9 @@ const DormRepository = require('./dorm_repository');
 const dao = new AppDAO('./database.db');
 const studentInfo = new StudentRepository(dao);
 const dormInfo = new DormRepository(dao);
-studentInfo.createTable()
+studentInfo.deleteTable()
+.then(() => dormInfo.deleteTable())
+.then(() => studentInfo.createTable())
 .then(() => dormInfo.createTable())
 .then(main)
 
@@ -65,6 +67,7 @@ function getAllStudents(){
 function main(){
     var app = http.createServer(function(req, res){
         if(req.method == 'POST'){
+            console.log("Query!")
             let body = '';
             req.on('data', chunk => {
                 body += chunk.toString();
@@ -74,17 +77,17 @@ function main(){
                 var qtype = queryData.qtype;
                 var _json = queryData.json;
                 if(qtype == null){
-                    res.writeHead(404);
-                    res.end();
+                    res.writeHead(200);
+                    res.end("Query invalid!");
                     return;
                 }
-                if(qtype != "getAllStudents" && _json == null){
-                    res.writeHead(404);
-                    res.end();
+                console.log(qtype)
+                if(qtype != "getAllStudents" && qtype != "clearDB" && _json == null){
+                    res.writeHead(200);
+                    res.end("Query invalid!");
                     return;
                 }
                 if(_json != null) json = JSON.parse(_json);
-                console.log(qtype)
                 if(qtype == 'setAlarm'){
                     // json : [1, 2, ...] --> contains id
                     setAlarm(json)
@@ -93,8 +96,8 @@ function main(){
                         res.end("successful");
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     });
                 }
                 else if(qtype == 'updateDB'){
@@ -106,8 +109,8 @@ function main(){
                         res.end("successful");
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     });
                 }
                 else if(qtype == 'addStudent'){
@@ -118,8 +121,8 @@ function main(){
                         res.end("successful");
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     });
                 }
                 else if(qtype == 'addRoom'){
@@ -130,8 +133,8 @@ function main(){
                         res.end(id.toString());
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     });
                 }
                 else if(qtype == 'getLatecnt'){
@@ -142,8 +145,8 @@ function main(){
                         res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     })
                 }
                 else if(qtype == 'getAlarm'){
@@ -154,8 +157,8 @@ function main(){
                         res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     })
                 }
                 else if(qtype == 'getAllStudents'){
@@ -165,8 +168,8 @@ function main(){
                         res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     })
                 }
                 else if(qtype == 'getBuildings'){
@@ -176,8 +179,8 @@ function main(){
                         res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     });
                 }
                 else if(qtype == 'getBuildingRooms'){
@@ -188,21 +191,40 @@ function main(){
                         res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
-                        res.writeHead(404);
-                        res.end();
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
                     });
                 }
+                else if(qtype == 'clearDB'){
+                    studentInfo.deleteTable()
+                    .then(() => dormInfo.deleteTable())
+                    .then(() => studentInfo.createTable()) 
+                    .then(() => dormInfo.createTable())
+                    .then(() => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(err));
+                    })
+                }
                 else{
-                    res.writeHead(404);
-                    res.end();
+                    res.writeHead(200);
+                    res.end("Query invalid!");
                 }
             });
         }
         else{
-            res.writeHead(404);
+            console.log("asdfasfdsa");
+            res.writeHead(200);
+            fs.readFile('index.html', (err, data) => {
+                res.end(data);
+            })
         }
         
     });
 
-    app.listen(80);
+    const PORT = process.env.PORT || 80;
+    app.listen(PORT);
 }

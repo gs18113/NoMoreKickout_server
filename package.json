@@ -11,5 +11,8 @@
   "dependencies": {
     "bluebird": "^3.7.1",
     "sqlite3": "^4.1.0"
+  },
+  "scripts": {
+	    "start": "node main.js"
   }
 }

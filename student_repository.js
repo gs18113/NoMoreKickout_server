@@ -17,6 +17,11 @@ class StudentRepository{
         return this.dao.run(sql);
     }
 
+    deleteTable(){
+        const sql = `DROP TABLE IF EXISTS studentInfo`;
+        return this.dao.run(sql);
+    }
+
     insert(row){
         return this.dao.run(
             `INSERT INTO studentInfo

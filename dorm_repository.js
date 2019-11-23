@@ -13,6 +13,11 @@ class DormRepository{
         return this.dao.run(sql);
     }
 
+    deleteTable(){
+        const sql = `DROP TABLE IF EXISTS dormInfo`;
+        return this.dao.run(sql);
+    }
+
     insert(row){
         const {building, room, members} = row;
         return this.dao.run(
