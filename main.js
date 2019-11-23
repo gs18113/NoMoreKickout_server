@@ -154,7 +154,7 @@ function main(){
                     getAlarm(json)
                     .then((value) => {
                         res.writeHead(200);
-                        res.end(JSON.stringify(value));
+                        res.end(value);
                     })
                     .catch((err) => {
                         res.writeHead(200);
