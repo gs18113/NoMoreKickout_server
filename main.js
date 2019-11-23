@@ -67,7 +67,6 @@ function getAllStudents(){
 function main(){
     var app = http.createServer(function(req, res){
         if(req.method == 'POST'){
-            console.log("Query!")
             let body = '';
             req.on('data', chunk => {
                 body += chunk.toString();
@@ -81,6 +80,7 @@ function main(){
                     res.end("Query invalid!");
                     return;
                 }
+                console.log("Received POST request. Query type: ");
                 console.log(qtype)
                 if(qtype != "getAllStudents" && qtype != "clearDB" && _json == null){
                     res.writeHead(200);
@@ -151,7 +151,6 @@ function main(){
                 }
                 else if(qtype == 'getAlarm'){
                     // json: {"ID": 1}
-                    console.log("Alarm!!")
                     getAlarm(json)
                     .then((value) => {
                         res.writeHead(200);
@@ -217,7 +216,7 @@ function main(){
             });
         }
         else{
-            console.log("Received GET request");
+            console.log("Received GET request.");
             res.writeHead(200);
             fs.readFile('index.html', (_err, data) => {
                 res.end(data);
