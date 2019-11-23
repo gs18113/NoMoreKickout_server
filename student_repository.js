@@ -20,8 +20,8 @@ class StudentRepository{
     insert(row){
         return this.dao.run(
             `INSERT INTO studentInfo
-            (ID building room name latecnt alarm)
-            VALUES (?)`, [row.ID, row.building, row.room, row.name, row.latecnt, row.alarm]
+            (ID, building, room, name, latecnt, alarm)
+            VALUES (?, ?, ?, ?, ?, ?)`, [row.ID, row.building, row.room, row.name, row.latecnt, row.alarm]
         );
     }
 
@@ -29,10 +29,10 @@ class StudentRepository{
         const {ID, building, room, name, latecnt, alarm} = row;
         return this.dao.run(
             `UPDATE studentInfo
-            SET building = ?
-            room = ?
-            name = ?
-            latecnt = ?
+            SET building = ?,
+            room = ?,
+            name = ?,
+            latecnt = ?,
             alarm = ?
             WHERE ID = ?`, [building, room, name, latecnt, alarm, ID]
         );
@@ -69,6 +69,10 @@ class StudentRepository{
         return this.dao.get(
             `SELECT * FROM studentInfo WHERE ID = ?`, [ID]
         );
+    }
+
+    getAll(){
+        return this.dao.all(`SELECT * FROM studentInfo`)
     }
 }
 

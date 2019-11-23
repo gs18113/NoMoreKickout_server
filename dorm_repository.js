@@ -6,24 +6,24 @@ class DormRepository{
     createTable(){
         const sql = `
         CREATE TABLE IF NOT EXISTS dormInfo(
-            ID NTEGER PRIMARY KEY AUTOINCREMENT,
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
             building TEXT NOT NULL,
             room INTEGER NOT NULL,
             members TEXT)`;
-        return this.run(sql);
+        return this.dao.run(sql);
     }
 
     insert(row){
-        const {building, room, memeberse} = row;
+        const {building, room, members} = row;
         return this.dao.run(
             `INSERT INTO dormInfo
-            (building room members)
-            VALUES (?)`, [building, room, members]
+            (building, room, members)
+            VALUES (?, ?, ?)`, [building, room, members]
         );
     }
 
     update(row){
-        const {ID, building, room, memebers} = row;
+        const {ID, building, room, members} = row;
         return this.dao.run(
             `UPDATE dormInfo 
             SET building = ?,
@@ -46,8 +46,16 @@ class DormRepository{
         );
     }
 
-    getDistinctCol(column){
-        // TODO
+    getAll(){
+        return this.dao.all(`SELECT * FROM dormInfo`);
+    }
+
+    getDistinctCol(){
+        return this.dao.all(`SELECT DISTINCT building FROM dormInfo`);
+    }
+
+    getBuildingRooms(name){
+        return this.dao.all('SELECT * FROM dormInfo WHERE building = ?', [name]);
     }
 }
 

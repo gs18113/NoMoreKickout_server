@@ -32,25 +32,34 @@ function updateDB(json){
 }
 
 function addStudent(json){
-    return studentInfo.add(json);
+    return studentInfo.insert(json);
 }
 
 function addRoom(json){
-    return dormInfo.add(json);
+    return dormInfo.insert(json)
+    .then(value => value.id);
 }
 
-function shouldWake(json){
-    return studentInfo.get(json.ID)
-    .then((data) => data.alarm);
-}
-
-function getState(json){
+function getLatecnt(json){
     return studentInfo.get(json.ID)
     .then(data => data.latecnt);
 }
 
-function getDorms(dorm){
-    // TODO
+function getAlarm(json){
+    return studentInfo.get(json.ID)
+    .then(data => data.alarm);
+}
+
+function getBuildings(){
+    return dormInfo.getDistinctCol();
+}
+
+function getBuildingRooms(name){
+    return dormInfo.getBuildingRooms(name);
+}
+
+function getAllStudents(){
+    return studentInfo.getAll();
 }
 
 function main(){
@@ -64,18 +73,24 @@ function main(){
                 var queryData = parse(body);
                 var qtype = queryData.qtype;
                 var _json = queryData.json;
-                if(qtype == null || _json == null){
+                if(qtype == null){
                     res.writeHead(404);
                     res.end();
                     return;
                 }
-                json = JSON.parse(_json);
+                if(qtype != "getAllStudents" && _json == null){
+                    res.writeHead(404);
+                    res.end();
+                    return;
+                }
+                if(_json != null) json = JSON.parse(_json);
+                console.log(qtype)
                 if(qtype == 'setAlarm'){
                     // json : [1, 2, ...] --> contains id
                     setAlarm(json)
                     .then(() => {
                         res.writeHead(200);
-                        res.end();
+                        res.end("successful");
                     })
                     .catch((err) => {
                         res.writeHead(404);
@@ -88,7 +103,7 @@ function main(){
                     updateDB(json)
                     .then(() => {
                         res.writeHead(200);
-                        res.end();
+                        res.end("successful");
                     })
                     .catch((err) => {
                         res.writeHead(404);
@@ -100,7 +115,7 @@ function main(){
                     addStudent(json)
                     .then(() => {
                         res.writeHead(200);
-                        res.end();
+                        res.end("successful");
                     })
                     .catch((err) => {
                         res.writeHead(404);
@@ -112,39 +127,81 @@ function main(){
                     addRoom(json)
                     .then((id) => {
                         res.writeHead(200);
-                        res.end(id);
+                        res.end(id.toString());
                     })
                     .catch((err) => {
                         res.writeHead(404);
                         res.end();
                     });
                 }
-                else if(qtype == 'shouldWake'){
+                else if(qtype == 'getLatecnt'){
                     // json: {"ID": 1}
-                    shouldWake(json)
+                    getLatecnt(json)
                     .then((value) => {
                         res.writeHead(200);
-                        res.end(value);
+                        res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
                         res.writeHead(404);
                         res.end();
                     })
                 }
-                else if(qtype == 'getState'){
+                else if(qtype == 'getAlarm'){
                     // json: {"ID": 1}
-                    getState(json)
+                    getAlarm(json)
                     .then((value) => {
                         res.writeHead(200);
-                        res.end(value);
+                        res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
                         res.writeHead(404);
                         res.end();
                     })
+                }
+                else if(qtype == 'getAllStudents'){
+                    getAllStudents()
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(value));
+                    })
+                    .catch((err) => {
+                        res.writeHead(404);
+                        res.end();
+                    })
+                }
+                else if(qtype == 'getBuildings'){
+                    getBuildings()
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(value));
+                    })
+                    .catch((err) => {
+                        res.writeHead(404);
+                        res.end();
+                    });
+                }
+                else if(qtype == 'getBuildingRooms'){
+                    // json: {"building": "우정2관"}
+                    getBuildingRooms(json.building)
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(value));
+                    })
+                    .catch((err) => {
+                        res.writeHead(404);
+                        res.end();
+                    });
+                }
+                else{
+                    res.writeHead(404);
+                    res.end();
                 }
             });
         }
+        else{
+            res.writeHead(404);
+        }
+        
     });
 
     app.listen(80);

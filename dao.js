@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3')
 const Promise = require('bluebird')
 
 class AppDAO{
-    constructor(dqFilePath){
+    constructor(dbFilePath){
         this.db = new sqlite3.Database(dbFilePath, (err) => {
             if(err){
                 console.log('Could not connect to database', err);
@@ -32,29 +32,27 @@ class AppDAO{
             this.db.get(sql, params, (err, result) => {
                 if (err) {
                     console.log('Error running sql: ' + sql)
-                    console.log(err)
-                    reject(err)
+                    console.log(err);
+                    reject(err);
                 } else {
-                    resolve(result)
+                    resolve(result);
                 }
             });
         });
     }
 
-    setAlarm(studentIds){
-
-    }
-    updateDB(json){
-
-    }
-    addStudent(json){
-
-    }
-    addRoom(json){
-
-    }
-    shouldWake(){
-
+    all(sql, params = []) {
+        return new Promise((resolve, reject) => {
+            this.db.all(sql, params, (err, rows) => {
+                if (err) {
+                    console.log('Error running sql: ' + sql);
+                    console.log(err);
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            })
+        })
     }
 
 }
