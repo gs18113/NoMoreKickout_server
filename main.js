@@ -216,15 +216,15 @@ function main(){
             });
         }
         else{
-            console.log("asdfasfdsa");
+            console.log("Received GET request");
             res.writeHead(200);
-            fs.readFile('index.html', (err, data) => {
+            fs.readFile('index.html', (_err, data) => {
                 res.end(data);
             })
         }
         
     });
 
-    const PORT = process.env.PORT || 80;
+    const PORT = 80;
     app.listen(PORT);
 }
