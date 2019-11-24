@@ -9,6 +9,7 @@ class DormRepository{
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             building TEXT NOT NULL,
             room INTEGER NOT NULL,
+            isawake INTEGER NOT NULL,
             members TEXT)`;
         return this.dao.run(sql);
     }
@@ -19,22 +20,43 @@ class DormRepository{
     }
 
     insert(row){
-        const {building, room, members} = row;
+        const {building, room, isawake, members} = row;
         return this.dao.run(
             `INSERT INTO dormInfo
-            (building, room, members)
-            VALUES (?, ?, ?)`, [building, room, members]
+            (building, room, isawake, members)
+            VALUES (?, ?, ?, ?)`, [building, room, isawake, members]
         );
     }
 
     update(row){
-        const {ID, building, room, members} = row;
+        const {ID, building, room, isawake, members} = row;
         return this.dao.run(
             `UPDATE dormInfo 
             SET building = ?,
             room = ?,
-            members
-            WHERE ID = ?`, [building, room, members, id]
+            isawake = ?,
+            members = ?
+            WHERE ID = ?`, [building, room, isawake, members, ID]
+        );
+    }
+
+    updateMembers(row){
+        const{ID, members} = row;
+        return this.dao.run(
+            `UPDATE dormInfo
+            SET members = ?
+            WHERE ID = ?
+            `, [members, ID]
+        );
+    }
+
+    updateAwake(row){
+        const{ID, isawake} = row;
+        return this.dao.run(
+            `UPDATE dormInfo
+            SET isawake = ?
+            WHERE ID = ?
+            `, [isawake, ID]
         );
     }
 
@@ -47,7 +69,7 @@ class DormRepository{
 
     get(ID){
         return this.dao.get(
-            `SELECT * FROM studentInfo WHERE ID = ?`, [ID]
+            `SELECT * FROM dormInfo WHERE ID = ?`, [ID]
         );
     }
 
@@ -61,6 +83,10 @@ class DormRepository{
 
     getBuildingRooms(name){
         return this.dao.all('SELECT * FROM dormInfo WHERE building = ?', [name]);
+    }
+
+    getByBuildingRoom(building, room){
+        return this.dao.get(`SELECT * FROM dormInfo WHERE building = ? AND room = ?`, [building, room]);
     }
 }
 

@@ -25,6 +25,20 @@ function setAlarm(json){
     return Promise.all(actions);
 }
 
+function setRoomAwake(json){
+    return dormInfo.updateAwake(json)
+    .then(() => {
+        return dormInfo.get(json.ID)
+        .then((row) => {
+            var members = JSON.parse(row.members);
+            var actions = members.map((id) => {
+                return studentInfo.updateAwake({ID: id, isawake: json.isawake});
+            })
+            return Promise.all(actions);
+        })
+    })
+}
+
 function setAwake(json){
     return studentInfo.updateAwake(json);
 }
@@ -96,6 +110,26 @@ function answerRequest(json){
             if(value.requestType == 1){
                 return studentInfo.get(value.ID)
                 .then((orig) => {
+                    return dormInfo.getByBuildingRoom(orig.building, orig.room)
+                    .then(room => {
+                        var members = JSON.parse(room.members);
+                        return dormInfo.updateMembers({
+                            ID: room.ID,
+                            members: JSON.stringify(members.filter(ID => (ID != orig.ID)))
+                        });
+                    })
+                    .then(() => dormInfo.getByBuildingRoom(value.building, value.room))
+                    .then(room => {
+                        var members = JSON.parse(room.members);
+                        members.push(value.ID);
+                        return dormInfo.updateMembers({
+                            ID: room.ID,
+                            members: JSON.stringify(members)
+                        });
+                    })
+                    .then(() => orig)
+                })
+                .then((orig) => {
                     return studentInfo.update({
                         ID: value.ID,
                         building: value.building.trim(),
@@ -109,7 +143,17 @@ function answerRequest(json){
                 });
             }
             else{
-                return studentInfo.insert({
+                return dormInfo.getByBuildingRoom(value.building, value.room)
+                .then(room => {
+                    var members = JSON.parse(room.members);
+                    members.push(value.ID);
+                    return dormInfo.updateMembers({
+                        ID: room.ID,
+                        members: JSON.stringify(members)
+                    });
+                })
+                .then(() => 
+                    studentInfo.insert({
                     ID: value.ID,
                     building: value.building.trim(),
                     room: value.room,
@@ -118,7 +162,7 @@ function answerRequest(json){
                     noAlert: value.noAlert,
                     isawake: 0,
                     alarm: 0
-                });
+                    }));
             }
         })
         .then(() => requestInfo.delete(json.RID));
@@ -170,9 +214,21 @@ function main(){
                     res.writeHead(200);
                     res.end(err.toString());
                 }
-                if(qtype == 'setAlarm'){
+                /*if(qtype == 'setAlarm'){
                     // json : [1, 2, ...] --> contains id
                     setAlarm(json)
+                    .then(() => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    });
+                }*/
+                if(qtype == 'setRoomAlarm'){
+                    // json : [1, 2, ...] --> contains id
+                    setRoomAlarm(json)
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");
@@ -193,9 +249,21 @@ function main(){
                         res.end(err.toString());
                     });
                 }
-                else if(qtype == 'setAwake'){
+                /*else if(qtype == 'setAwake'){
                     // json : {"ID": ?, "isawake":0/1} 
                     setAwake(json)
+                    .then(() => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    });
+                }*/
+                else if(qtype == 'setRoomAwake'){
+                    // json : {"ID": ?, "isawake":0/1} 
+                    setRoomAwake(json)
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");
@@ -218,7 +286,7 @@ function main(){
                         res.end(err.toString());
                     });
                 }
-                else if(qtype == 'addStudent'){
+                /*else if(qtype == 'addStudent'){
                     // json : {"ID": ?, "building": ?, "room": ?, "name": ?, "latecnt": ?, "alarm": ?}
                     addStudent(json)
                     .then(() => {
@@ -229,7 +297,7 @@ function main(){
                         res.writeHead(200);
                         res.end(err.toString());
                     });
-                }
+                }*/
                 else if(qtype == 'addRoom'){
                     // json : {"building": ?, "room": ?, "members": ?}
                     addRoom(json)
@@ -373,6 +441,18 @@ function main(){
                     .catch((err) => {
                         res.writeHead(200);
                         res.end("false");
+                    })
+                }
+                else if(qtype == 'getRoomAwake'){
+                    //json: {"ID": ?}
+                    getRoomAwake(json.ID)
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(value.toString());
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err);
                     })
                 }
                 else{
