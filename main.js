@@ -41,10 +41,10 @@ function setAwake(json){
     return studentInfo.updateAwake(json);
 }
 
-function addLate(json){
+function addLate(rows){
     return Promise.all(
-        json.map((value) => {
-        studentInfo.get()
+        rows.map((id) => {
+        studentInfo.get(id)
         .then((data) => {
             data.latecnt++;
             studentInfo.update(data);
@@ -281,8 +281,9 @@ function main(){
                 }
                 else if(qtype == 'addLate'){
                     // late cnt ++
-                    // json : [1, 2, ...] --> contains id
-                    addLate(json)
+                    // json : {"addLate"=[1, 2, ...]} --> contains id
+                    rows = JSON.parse(json.rows)
+                    addLate(rows)
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");
