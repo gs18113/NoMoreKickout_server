@@ -97,6 +97,14 @@ class StudentRepository{
     getAllSleeping(){
         return this.dao.all(`SELECT * FROM studentInfo WHERE isAwake = 0`)
     }
+
+    resetAll(){
+        return this.dao.run(`
+        UPDATE studentInfo 
+        SET
+        isawake = 0
+        alarm = 0`);
+    }
 }
 
 module.exports = StudentRepository;

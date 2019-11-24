@@ -281,6 +281,9 @@ function main(){
                     // late cnt ++
                     addLate()
                     .then(() => {
+                        return studentInfo.resetAll();
+                    })
+                    .then(() => {
                         res.writeHead(200);
                         res.end("successful");
                     })
