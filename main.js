@@ -135,7 +135,13 @@ function main(){
                     res.end("Query invalid!");
                     return;
                 }
-                if(_json != null) json = JSON.parse(_json);
+                try{
+                    if(_json != null) json = JSON.parse(_json);
+                }
+                catch(err){
+                    res.writeHead(200);
+                    res.end(err.toString());
+                }
                 if(qtype == 'setAlarm'){
                     // json : [1, 2, ...] --> contains id
                     setAlarm(json)
