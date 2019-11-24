@@ -102,7 +102,7 @@ class StudentRepository{
         return this.dao.run(`
         UPDATE studentInfo 
         SET
-        isawake = 0
+        isawake = 0,
         alarm = 0`);
     }
 }
