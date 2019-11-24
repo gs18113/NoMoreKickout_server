@@ -42,15 +42,13 @@ function setAwake(json){
 }
 
 function addLate(rows){
-    return Promise.all(
-        rows.map((id) => {
-        studentInfo.get(id)
-        .then((data) => {
-            data.latecnt++;
-            studentInfo.update(data);
+    return studentInfo.getAllSleeping()
+    .then(rows => {
+        var actions = rows.map((row) => {
+            return studentInfo.updateLate({ID: row.ID, latecnt: row.latecnt+1});
         });
-    })
-    );
+        return Promise.all(actions);
+    });
 }
 
 function addStudent(json){
@@ -281,9 +279,7 @@ function main(){
                 }
                 else if(qtype == 'addLate'){
                     // late cnt ++
-                    // json : {"addLate"=[1, 2, ...]} --> contains id
-                    rows = JSON.parse(json.rows)
-                    addLate(rows)
+                    addLate()
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");
