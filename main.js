@@ -10,19 +10,17 @@ const dao = new AppDAO('./database.db');
 const studentInfo = new StudentRepository(dao);
 const dormInfo = new DormRepository(dao);
 const requestInfo = new RequestRepository(dao);
-studentInfo.deleteTable()
+/*studentInfo.deleteTable()
 .then(() => dormInfo.deleteTable())
 .then(() => requestInfo.deleteTable())
 .then(() => studentInfo.createTable())
 .then(() => dormInfo.createTable())
 .then(() => requestInfo.createTable())
-.then(main)
+.then(main)*/
+main();
 
 function setAlarm(json){
-    var actions = json.map((value) => {
-        return studentInfo.updateAlarm({ID: value, alarm: 1});
-    });
-    return Promise.all(actions);
+    return studentInfo.updateAlarm(json);
 }
 
 function setRoomAwake(json){
@@ -214,8 +212,8 @@ function main(){
                     res.writeHead(200);
                     res.end(err.toString());
                 }
-                /*if(qtype == 'setAlarm'){
-                    // json : [1, 2, ...] --> contains id
+                if(qtype == 'setAlarm'){
+                    // json : {"ID":?, "alarm":0/1}
                     setAlarm(json)
                     .then(() => {
                         res.writeHead(200);
@@ -225,7 +223,7 @@ function main(){
                         res.writeHead(200);
                         res.end(err.toString());
                     });
-                }*/
+                }
                 if(qtype == 'setRoomAlarm'){
                     // json : [1, 2, ...] --> contains id
                     setRoomAlarm(json)
