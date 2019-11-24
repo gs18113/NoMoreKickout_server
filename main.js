@@ -123,6 +123,10 @@ function main(){
                 var queryData = parse(body);
                 var qtype = queryData.qtype;
                 var _json = queryData.json;
+                if(_json != null && qtype == null){
+                    json = JSON.parse(_json);
+                    if(json.qtype != null) qtype = json.qtype;
+                }
                 if(qtype == null){
                     res.writeHead(200);
                     res.end("Query invalid!");
