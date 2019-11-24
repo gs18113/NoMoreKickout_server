@@ -373,7 +373,7 @@ function main(){
                     getStudentInfo(json.ID)
                     .then(value => {
                         res.writeHead(200);
-                        res.end(value.toString());
+                        res.end(JSON.stringify(value));
                     })
                     .catch((err) => {
                         res.writeHead(200);
