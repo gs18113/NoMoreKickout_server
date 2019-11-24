@@ -14,6 +14,7 @@ class StudentRepository{
             name TEXT NOT NULL,
             latecnt INTEGER NOT NULL,
             noAlert INTEGER NOT NULL,
+            isawake INTEGER NOT NULL,
             alarm INTEGER NOT NULL)`;
         return this.dao.run(sql);
     }
@@ -26,13 +27,13 @@ class StudentRepository{
     insert(row){
         return this.dao.run(
             `INSERT INTO studentInfo
-            (ID, building, room, name, latecnt, noAlert, alarm)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`, [row.ID, row.building, row.room, row.name, row.latecnt, row.noAlert, row.alarm]
+            (ID, building, room, name, latecnt, noAlert, isawake, alarm)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [row.ID, row.building, row.room, row.name, row.latecnt, row.noAlert, row.isawake, row.alarm]
         );
     }
 
     update(row){
-        const {ID, building, room, name, latecnt, noAlert, alarm} = row;
+        const {ID, building, room, name, latecnt, noAlert, isawake, alarm} = row;
         return this.dao.run(
             `UPDATE studentInfo
             SET building = ?,
@@ -40,8 +41,9 @@ class StudentRepository{
             name = ?,
             latecnt = ?,
             noAlert = ?,
+            isawake = ?,
             alarm = ?
-            WHERE ID = ?`, [building, room, name, latecnt, noAlert, alarm, ID]
+            WHERE ID = ?`, [building, room, name, latecnt, noAlert, isawake, alarm, ID]
         );
     }
 
@@ -65,6 +67,16 @@ class StudentRepository{
         );
     }
 
+    updateAwake(row){
+        const {ID, isawake} = row;
+        return this.dao.run(
+            `UPDATE studentInfo
+            SET
+            isawake = ?
+            WHERE ID = ?`, [isawake, ID]
+        );
+    }
+
     delete(ID){
         return this.dao.run(
             `DELETE FROM studentInfo WHERE ID = ?`,
@@ -80,6 +92,10 @@ class StudentRepository{
 
     getAll(){
         return this.dao.all(`SELECT * FROM studentInfo`)
+    }
+
+    getAllSleeping(){
+        return this.dao.all(`SELECT * FROM studentInfo WHERE isAwake = 0`)
     }
 }
 

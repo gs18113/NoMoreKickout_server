@@ -20,9 +20,13 @@ studentInfo.deleteTable()
 
 function setAlarm(json){
     var actions = json.map((value) => {
-        return studentInfo.update({ID: value, alarm: 1});
+        return studentInfo.updateAlarm({ID: value, alarm: 1});
     });
     return Promise.all(actions);
+}
+
+function setAwake(json){
+    return studentInfo.updateAwake(json);
 }
 
 function addLate(json){
@@ -77,6 +81,14 @@ function getAllRequests(){
     return requestInfo.getAll();
 }
 
+function getStudentInfo(ID){
+    return studentInfo.get(ID);
+}
+
+function viewRequestExists(RID){
+    return requestInfo.get(RID);
+}
+
 function answerRequest(json){
     if(json.confirm == 1){
         return requestInfo.get(json.RID)
@@ -91,6 +103,7 @@ function answerRequest(json){
                         name: value.name,
                         latecnt: orig.latecnt,
                         noAlert: value.noAlert,
+                        isawake: orig.isawake,
                         alarm: orig.alarm
                     });
                 });
@@ -103,6 +116,7 @@ function answerRequest(json){
                     name: value.name,
                     latecnt: 0,
                     noAlert: value.noAlert,
+                    isawake: 0,
                     alarm: 0
                 });
             }
@@ -110,6 +124,16 @@ function answerRequest(json){
         .then(() => requestInfo.delete(json.RID));
     }
     else return requestInfo.delete(json.RID);
+}
+
+function wakeAll(){
+    return studentInfo.getAllSleeping()
+    .then(rows => {
+        var actions = rows.map((row) => {
+            return studentInfo.updateAlarm({ID: row.ID, alarm: 1});
+        });
+        return Promise.all(actions);
+    });
 }
 
 function main(){
@@ -134,7 +158,7 @@ function main(){
                 }
                 console.log("Received POST request. Query type: ");
                 console.log(qtype)
-                if(qtype != "getAllStudents" && qtype != "clearDB" && qtype != "getAllRequests" && _json == null){
+                if(qtype != "getAllStudents" && qtype != "wakeAll" && qtype != "clearDB" && qtype != "getAllRequests" && _json == null){
                     res.writeHead(200);
                     res.end("Query invalid!");
                     return;
@@ -149,6 +173,29 @@ function main(){
                 if(qtype == 'setAlarm'){
                     // json : [1, 2, ...] --> contains id
                     setAlarm(json)
+                    .then(() => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    });
+                }
+                else if(qtype == 'wakeAll'){
+                    wakeAll(json)
+                    .then(() => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    });
+                }
+                else if(qtype == 'setAwake'){
+                    // json : {"ID": ?, "isawake":0/1} 
+                    setAwake(json)
                     .then(() => {
                         res.writeHead(200);
                         res.end("successful");
@@ -253,6 +300,18 @@ function main(){
                         res.end(err.toString());
                     });
                 }
+                else if(qtype == 'getStudentInfo'){
+                    // json: {"ID": ?}
+                    getStudentInfo(json.ID)
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(value.toString());
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    })
+                }
                 else if(qtype == 'clearDB'){
                     studentInfo.deleteTable()
                     .then(() => dormInfo.deleteTable())
@@ -302,6 +361,18 @@ function main(){
                     .catch((err) => {
                         res.writeHead(200);
                         res.end(err.toString());
+                    })
+                }
+                else if(qtype == 'viewRequestExists'){
+                    //json: {"RID": ?}
+                    viewRequestExists(json.RID)
+                    .then((value) => {
+                        res.writeHead(200);
+                        res.end((value != null).toString());
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end("false");
                     })
                 }
                 else{
