@@ -85,6 +85,10 @@ function getBuildingRooms(name){
     return dormInfo.getBuildingRooms(name);
 }
 
+function getAllRooms(){
+    return dormInfo.getAll();
+}
+
 function getAllStudents(){
     return studentInfo.getAll();
 }
@@ -200,7 +204,7 @@ function main(){
                 }
                 console.log("Received POST request. Query type: ");
                 console.log(qtype)
-                if(qtype != "getAllStudents" && qtype != "wakeAll" && qtype != "clearDB" && qtype != "getAllRequests" && _json == null){
+                if(qtype != "getAllStudents" && qtype != "wakeAll" && qtype != "clearDB" && qtype != "getAllRequests" && qtype != "getAllRooms" && _json == null){
                     res.writeHead(200);
                     res.end("Query invalid!");
                     return;
@@ -357,6 +361,17 @@ function main(){
                 else if(qtype == 'getBuildingRooms'){
                     // json: {"building": "우정2관"}
                     getBuildingRooms(json.building)
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(value));
+                    })
+                    .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err.toString());
+                    });
+                }
+                else if(qtype == 'getAllRooms'){
+                    getAllRooms()
                     .then(value => {
                         res.writeHead(200);
                         res.end(JSON.stringify(value));
