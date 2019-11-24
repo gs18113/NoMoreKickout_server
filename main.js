@@ -182,6 +182,10 @@ function wakeAll(){
     });
 }
 
+function deleteRoom(ID){
+    return dormInfo.delete(ID);
+}
+
 function main(){
     var app = http.createServer(function(req, res){
         if(req.method == 'POST'){
@@ -464,6 +468,18 @@ function main(){
                         res.end(value.toString());
                     })
                     .catch((err) => {
+                        res.writeHead(200);
+                        res.end(err);
+                    })
+                }
+                else if(qtype == 'deleteRoom'){
+                    // json: {"ID": ?}
+                    deleteRoom(json.ID)
+                    .then(value => {
+                        res.writeHead(200);
+                        res.end("successful");
+                    })
+                    .catch(err => {
                         res.writeHead(200);
                         res.end(err);
                     })
